@@ -3,10 +3,10 @@ from functools import partial # To prevent unwanted windows
 
 # import all_constants as c
 
-
 class StartGame():
     """
-    Temperature conversion tool (℃ to ℉ or ℉ to ℃)
+    Initial Game interface (asks user how many rounds they
+    would like to play)
     """
 
     def __init__(self):
@@ -14,86 +14,89 @@ class StartGame():
         Game Start GUI
         """
 
-        self.game_frame = Frame(padx=10, pady=10, bg="#DAE8FC")
-        self.game_frame.grid()
+        self.start_frame = Frame(padx=10, pady=10)
+        self.start_frame.grid()
 
-        self.temp_heading = Label(self.game_frame,
-                                  text="Colour Quest",
-                                  font=("Arial", "16", "bold"),
-                                  bg="#DAE8FC",
-                                  )
-        self.temp_heading.grid(row=0)
-
-        instructions = "In each round you will be invited to choose a colour. " \
+        intro_string = "In each round you will be invited to choose a colour. " \
                        "Your goal is to beat the target score and win the round " \
                        "(and keep your points). \n\n" \
                        "To begin, please choose how many rounds you'd like to play."
 
-        self.colour_instructions = Label(self.game_frame,
-                                         text=instructions,
-                                         wraplength=250, width=40,
-                                         justify="left", bg="#DAE8FC")
-        self.colour_instructions.grid(row=1)
+        # choose_string = "Oops - Please choose a whole number more than zero"
+        choose_string = "How many rounds do you want to play?"
 
-        error = "Please enter a number"
-        self.answer_error = Label(self.game_frame, text=error, fg="#004C99", bg="#DAE8FC", font=("Arial", "10", "bold"))
-        self.answer_error.grid(row=2)
+        # List of labels to be made (text | font | fg)
+        start_labels_list = [
+            ["Colour Quest", ("Arial", "16", "bold"), None],
+            [intro_string, ("Arial", "12"), None],
+            [choose_string, ("Arial", "12", "bold"), "#009900"]
+        ]
 
-        self.round_entry = Entry(self.game_frame,
-                                 font=("Arial", "20"),
-                                 bg="#FFFFFF"
-                                 )
-        self.round_entry.grid(row=3, padx=10, pady=10)
+        # Create labels and add them to the reference list...
 
-        # Conversion, help and history / export buttons
-        self.button_frame = Frame(self.game_frame, bg="#DAE8FC")
-        self.button_frame.grid(row=4)
+        start_label_ref = []
+        for count, item in enumerate(start_labels_list):
+            make_label = Label(self.start_frame, text=item[0], font=item[1], fg=item[2], wraplength=350, justify="left", pady=10, padx=20)
 
-        self.play_button = Button(self.button_frame,
-                                  text="Play!", bg="#0057D8",
-                                  fg="#ffffff", font=("Arial", "12", "bold"),
-                                  width=12)
-        self.play_button.grid(row=0, padx=5, pady=5)
+            make_label.grid(row=count)
 
-        self.check_int()
+            start_label_ref.append(make_label)
+
+        # Extract choice label so that it can be changed to an error message if necessary
+        self.choose_label = start_label_ref[2]
+
+        # Frame so that entry box and bottom can be in the same row
+        self.entry_area_frame = Frame(self.start_frame)
+        self.entry_area_frame.grid(row=3)
+
+        self.num_rounds_entry = Entry(self.entry_area_frame, font=("Arial", "20", "bold"), width=10)
+
+        self.num_rounds_entry.grid(row=0, column=0, padx=10, pady=10)
+
+        # Create play button
+        self.play_button = Button(self.entry_area_frame, font=("Arial", "16", "bold"),
+                                  fg="#FFFFFF", bg="#0057D8", text="Play", width=10,
+                                  command=self.check_rounds)
+        self.play_button.grid(row=0, column=1)
 
     def check_rounds(self):
         """
-        Checks temperature is valid and either invokes calculation function or shows a custom error
+        Checks user's input to see if it is an integer
         """
         # Retrieve temperature to be converted
-        to_check = self.round_entry.get()
+        rounds_wanted = self.num_rounds_entry.get()
 
         # Reset label and entry box (if we had an error)
-        self.answer_error.config(fg="#004C99")
-        self.round_entry.config(bg="#FFFFFF")
+        self.choose_label.config(fg="#009900", font=("Arial", "12", "bold"))
+        self.num_rounds_entry.config(bg="#FFFFFF")
+
+        error = "Oops - Please choose a whole number more than zero!"
+        has_errors = "no"
 
         # Checks that amount to be converted is a number above absolute zero
         try:
-            to_check = int(to_check)
-            if to_check <= 0:
-                error = ""
+            rounds_wanted = int(rounds_wanted)
+            if rounds_wanted > 0:
+                # temporary success message, replace with call to PlayGame class
+                self.choose_label.config(text=f"You have chosen to play {rounds_wanted} rounds")
 
             else:
-                error = "Too Low!"
+                has_errors = "yes"
 
         except ValueError:
-            error = "Oops - Please choose a whole number more than zero!"
+            has_errors = "yes"
 
-        # Display the error if frequency
-        if error != "":
-            self.answer_error.config(text=error, fg="#990000")
-            self.round_entry.config(bg="#F4CCCC")
-            self.round_entry.delete(0, END)
-
-        else:
-            self.answer_error.config(text="OK!")
-            self.round_entry.delete(0, END)
+        # display the error if necessary
+        if has_errors == "yes":
+            self.choose_label.config(text=error, fg="#990000",
+                                     font=("Arial", "10", "bold"))
+            self.num_rounds_entry.config(bg="#F4CCCC")
+            self.num_rounds_entry.delete(0, END)
 
 
 # Main Routine 
 if __name__ == "__main__":
     root = Tk()
     root.title("Colour Quest")
-    Converter()
+    StartGame()
     root.mainloop()
