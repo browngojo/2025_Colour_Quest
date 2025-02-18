@@ -60,7 +60,7 @@ class StartGame():
 
     def check_rounds(self):
         """
-        Checks temperature is valid and either invokes calculation function or shows a custom error
+        Checks user's input to see if it is an integer
         """
         # Retrieve temperature to be converted
         rounds_wanted = self.num_rounds_entry.get()
@@ -108,6 +108,7 @@ class Play:
         self.game_heading_label = Label(self.game_frame, text=f"Round 0 of {how_many}",
                                         font=("Arial", "16", "bold"))
         self.game_heading_label.grid(row=0)
+
 
 # Main Routine 
 if __name__ == "__main__":
